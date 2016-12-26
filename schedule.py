@@ -236,7 +236,9 @@ class Display:
                                                 rw)]
                 # colourful track
                 possible_lines.append('{}{:{}}{}'.format(
-                    self.color(event.track), event.track, rw, Color.Neutral))
+                    self.color(event.track),
+                    textwrap.shorten(event.track, width=rw, placeholder=' ..'),
+                    rw, Color.Neutral))
                 # persons
                 possible_lines += textwrap.wrap(', '.join(event.persons), rw)
                 # end
