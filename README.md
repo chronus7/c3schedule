@@ -107,57 +107,38 @@ optional arguments:
 
 ```
 # -e short
-┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│Reverse engineering Outernet (8399)                                                                                 │
-│                                                                                                                    │
-│---                                                                                                                 │
-│                                                                                                                    │
-│Hardware & Making // Saal 2 // en                                                                                   │
-│                                                                                                                    │
-│Tue 2016-12-27 [11:30 <02:00> 12:30]                                                                                │
-│                                                                                                                    │
-│Daniel Estévez                                                                                                      │
-│                                                                                                                    │
-└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│What could possibly go wrong with <insert x86 instruction here>? (8044)                                             │
-│                                                                                                                    │
-│--- Side effects include side-channel attacks and bypassing kernel ASLR                                             │
-│                                                                                                                    │
-│Security // Saal G // en                                                                                            │
-│                                                                                                                    │
-│Tue 2016-12-27 [11:30 <02:00> 12:30]                                                                                │
-│                                                                                                                    │
-│Clémentine Maurice, Moritz Lipp                                                                                     │
-│                                                                                                                    │
-└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────┐
+│The Global Assassination Grid (8425)                                                        │
+│--- The Infrastructure and People behind Drone Killings                                     │
+│Ethics, Society & Politics // Saal 1 // en                                                  │
+│Tue 2016-12-27 [11:30 <02:00> 12:30]                                                        │
+│Cian Westmoreland                                                                           │
+└────────────────────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────┐
+│Everything you always wanted to know about Certificate Transparency (8167)                  │
+│--- (but were afraid to ask)                                                                │
+│Security // Saal 6 // en                                                                    │
+│Tue 2016-12-27 [11:30 <02:00> 12:30]                                                        │
+│Martin Schmiedecker                                                                         │
+└────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 ```
 # -e full
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │The Global Assassination Grid (8425)                                                                                │
-│                                                                                                                    │
 │--- The Infrastructure and People behind Drone Killings                                                             │
-│                                                                                                                    │
 │Ethics, Society & Politics // Saal 1 // en                                                                          │
-│                                                                                                                    │
 │Tue 2016-12-27 [11:30 <02:00> 12:30]                                                                                │
-│                                                                                                                    │
 │Cian Westmoreland                                                                                                   │
-│                                                                                                                    │
-│                                                                                                                    │
 │                                                                                                                    │
 │ABSTRACT As they say in the Air Force, ‚No comms no bombs‘,  – A technician’s insight into the invisible            │
 │networks governing military drones and the quest for accountability                                                 │
-│                                                                                                                    │
-│                                                                                                                    │
 │                                                                                                                    │
 │DESCRIPTION Cian has spent a great deal of time thinking about the issues of responsibility in, and how             │
 │communications technology has been used to distance people from the act of killing. Rising superpowers around the   │
 │world are working day and night to build the next stealth drone that can penetrate air defense systems. The         │
 │automation of target selection processes, navigation and control are incentivized by the vulnerability posed by the │
 │signals drones rely upon to operate.                                                                                │
-│                                                                                                                    │
 │A drone is merely a networked platform that moves across a grid, much like a mouse. It’s „mind“ is distributed among│
 │dozens of individuals located around the globe, controlling separate parts of the the overall mission using data    │
 │derived from surveillance, and processed using algorithms that may or may not reflect the reality on the ground.    │
@@ -165,7 +146,6 @@ optional arguments:
 │explain why this is so, as well as how mistakes happen. The automation of these processes will further take the     │
 │responsibility out of the hands of individuals and disperse them further. This calls for a new level of ethical     │
 │considerations and accountability mechanisms to be developed.                                                       │
-│                                                                                                                    │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
