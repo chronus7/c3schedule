@@ -378,20 +378,6 @@ def retrieve(offline=False) -> GenericObject:
 def main():
     ap = argparse.ArgumentParser(
         description='Interface to the 33C3 Fahrplan (schedule).')
-    # nocolors
-    # ascii
-    # verbose
-    # offline
-    # steps
-    # event-listing
-    # selected: select, show selected (no colors useless here)
-    # rooms
-    # tracks
-    # time: [[[[[year] month] day] hour] minute]
-    # next
-    # day
-    # all
-    # one
     ap.add_argument('-a', '--ascii', action='store_true',
                     help='Print ascii symbols instead of UTF-8 ones.')
     ap.add_argument('-n', '--nocolor', action='store_true',
@@ -485,9 +471,7 @@ def main():
         print(prefix, '{:3d} events'.format(len(schedule.events))),
         print(prefix, '{:3d} speakers'.format(len(schedule.speakers_list)))
 
-    # display
-    display = Display(schedule, interval, args.ascii)
-
+    # select events
     events = []
     if args.one:
         events = [schedule.ids[args.one]]
@@ -499,6 +483,15 @@ def main():
         events = schedule.events
     else:
         events = schedule.at(time, args.rooms, args.tracks)
+    if args.selected:
+        events = [ev for ev in events if ev.id in selected]
+
+    # exit, if none found
+    if not events:
+        exit()
+
+    # display
+    display = Display(schedule, interval, args.ascii)
     if args.events:
         for event in events:
             print(display.event(event, args.events == 'short', selected))
