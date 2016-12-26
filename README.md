@@ -5,7 +5,10 @@ c3schedule
 based on the given filters.
 
 - **Views**: The tool supports two different methods to display events.
-    1. The default one is the timetable-view as seen [here](#timetable)
+    1. The default one is the timetable-view as seen [here](#timetable). The
+       columns are adjusted to the available space (can be changed with the
+       interval (`-i`) option). As of such, some information might not be
+       visible.
     2. The other one is an individual view, where the event is displayed in more
        or less detail (depending on the value of `-e`; use `-O <id> -e full` for
        all information about that one event).
