@@ -1,0 +1,6 @@
+*.json
+*.lst
+
+.ropeproject/
+*.swp
+*.swo
