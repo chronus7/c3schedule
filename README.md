@@ -34,7 +34,7 @@ Installation
 ```shell
 git clone https://github.com/chronus7/c3schedule
 cd c3schedule
-python3 schedule.py
+./schedule.py -h
 ```
 
 Usage
@@ -79,7 +79,8 @@ optional arguments:
                         Show only the given event (ignores other filter).
 ```
 
-# Timetable
+Timetable
+---------
 
 ```
 # 95 columns
@@ -103,7 +104,8 @@ optional arguments:
   :30│───────────────────────────│───────────────────────────│Clémentine Maurice, Moritz │Security                   │
 ```
 
-# Individual
+Individual
+----------
 
 ```
 # -e short
