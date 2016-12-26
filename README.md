@@ -11,7 +11,9 @@ based on the given filters.
        all information about that one event).
 - **Date**: The tool's most important filter is the time (`-d`). Per default the
   current time is used and all parallel running lectures are listed. Options
-  like `-d`, `-N`, `-D`, `-A` influence that time.
+  like `-d`, `-N`, `-D`, `-A` influence that time. The options for `-d` are
+  nested: `[[[[[year] month] day] hour] minute]`. So to select the second day,
+  while being in December, one could write `-d 28 11 00 -D`.
 - **Filter**: There are different options to filter the output. This includes
   date/time, rooms, tracks (categories) and selections.
 - **Selection**: The tool lets you select/mark different events, so they can be
