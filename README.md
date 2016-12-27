@@ -113,14 +113,14 @@ Individual
 │The Global Assassination Grid (8425)                                                        │
 │--- The Infrastructure and People behind Drone Killings                                     │
 │Ethics, Society & Politics // Saal 1 // en                                                  │
-│Tue 2016-12-27 [11:30 <02:00> 12:30]                                                        │
+│Tue 2016-12-27 [11:30 <01:00> 12:30]                                                        │
 │Cian Westmoreland                                                                           │
 └────────────────────────────────────────────────────────────────────────────────────────────┘
 ┌────────────────────────────────────────────────────────────────────────────────────────────┐
 │Everything you always wanted to know about Certificate Transparency (8167)                  │
 │--- (but were afraid to ask)                                                                │
 │Security // Saal 6 // en                                                                    │
-│Tue 2016-12-27 [11:30 <02:00> 12:30]                                                        │
+│Tue 2016-12-27 [11:30 <01:00> 12:30]                                                        │
 │Martin Schmiedecker                                                                         │
 └────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -130,7 +130,7 @@ Individual
 │The Global Assassination Grid (8425)                                                                                │
 │--- The Infrastructure and People behind Drone Killings                                                             │
 │Ethics, Society & Politics // Saal 1 // en                                                                          │
-│Tue 2016-12-27 [11:30 <02:00> 12:30]                                                                                │
+│Tue 2016-12-27 [11:30 <01:00> 12:30]                                                                                │
 │Cian Westmoreland                                                                                                   │
 │                                                                                                                    │
 │ABSTRACT As they say in the Air Force, ‚No comms no bombs‘,  – A technician’s insight into the invisible            │

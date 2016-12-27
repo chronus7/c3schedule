@@ -260,11 +260,15 @@ class Display:
                     line = ' ' * rw
                     if index < len(possible_lines):
                         line = possible_lines[index]
+                    # add padding for lines before this one
+                    for o in range(i - len(timelines[current])):
+                        timelines[current].append('')
                     timelines[current].append(line)
                     index += 1
                     current += step_size
 
             # add empty lines
+            # ... too late
             for k, v in sorted(timelines.items()):
                 if len(v) < i + 1:
                     v.append('')
@@ -324,7 +328,7 @@ class Display:
             '{} {} [{} <{}> {}]'.format(event.date.strftime('%a'),
                                         event.date.strftime(DATEFMT),
                                         event.date.strftime(TIMEFMT),
-                                        datetime.datetime.fromtimestamp(
+                                        datetime.datetime.utcfromtimestamp(
                                             event.duration.seconds)
                                         .strftime(TIMEFMT),
                                         event.end.strftime(TIMEFMT)),
