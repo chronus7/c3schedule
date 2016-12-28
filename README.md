@@ -23,7 +23,9 @@ based on the given filters.
 - **Selection**: The tool lets you select/mark different events, so they can be
   highlighted, when viewed. The events have to selected via their id (seen
   behind their title) with the option `-s` (or alternatively you can write them
-  into the `SELECFILE` by yourself). To see all selected items, use `-SA`.
+  into the `SELECFILE` by yourself). To see all selected items, use `-SA`. The
+  configuration file accepts nearly everything, as just the first number in a
+  line is accepted; everything else is ignored (and preserved upon saving).
 - **Offline**: Per default, `c3schedule` tries to pull the schedule from the net
   and stores it locally. If the network connection fails, it uses the locally
   stored version. Use the `-o` flag to use the local file directly.

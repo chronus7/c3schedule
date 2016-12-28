@@ -12,6 +12,7 @@ import datetime
 import enum
 import json
 import os
+import pathlib
 import re
 import textwrap
 from urllib.request import urlopen
@@ -23,7 +24,7 @@ TIMEFMT = '%H:%M'
 
 REMOTE = 'https://fahrplan.events.ccc.de/congress/2016/Fahrplan/schedule.json'
 LOCAL = 'schedule.json'
-SELECTED = 'selected.lst'
+SELECTED = 'selected.conf'
 
 
 class GenericObject(dict):
@@ -361,6 +362,42 @@ class Display:
         return Color.get((index % (len(Color) - 1)) + 1)
 
 
+class Config:
+    def __init__(self, path):
+        path = pathlib.Path(path)
+        if not path.exists():
+            path.touch()
+
+        self.path = path
+        self._values = set()
+        self._parseSelected()
+
+    @property
+    def selected(self) -> set:
+        return self._values
+
+    @selected.setter
+    def selected(self, items: set):
+        self._storeSelected(items)
+        self._values |= items
+
+    def _parseSelected(self):
+        """Parses the file to read the list of selected events"""
+        with self.path.open('r') as f:
+            data = f.readlines()
+        for line in data:
+            line = line.strip()
+            m = re.match('^\d+', line)
+            if m:
+                value = line[slice(*m.span())]
+                self._values.add(int(value))
+
+    def _storeSelected(self, items: set):
+        with self.path.open('a') as f:
+            for item in items:
+                print(item, file=f)
+
+
 def getSize() -> tuple:
     """Get the terminal/output size"""
     try:
@@ -413,7 +450,9 @@ def main():
 
     # selected
     ap.add_argument('-s', '--select', nargs='+', metavar='ID', type=int,
-                    help='Store the given ids as selected ones.')
+                    help='Store the given ids as selected ones. This '
+                    'operation is additive and does not remove any previously '
+                    'stored values.')
     ap.add_argument('--selectfile', default=SELECTED,
                     help='The file to store the selected events in.')
     ap.add_argument('-S', '--selected', action='store_true',
@@ -445,17 +484,13 @@ def main():
     args = ap.parse_args()
     # ====================
 
+    # build config
+    config = Config(args.selectfile)
+
     # store selected ids
     if args.select:
-        with open(args.selectfile, 'a') as f:
-            for i in args.select:
-                print(i, file=f)
-
-    # reading selected
-    selected = set()
-    if os.path.exists(args.selectfile):
-        with open(args.selectfile, 'r') as f:
-            selected = {int(i.strip()) for i in f.readlines()}
+        config.selected = set(args.select)
+    selected = config.selected
 
     # nocolor
     if args.nocolor:
