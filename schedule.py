@@ -194,7 +194,7 @@ class Display:
             self.HL, self.VL = '\u2500', '\u2502'
             self.TL, self.TR = '\u250C', '\u2510'
             self.BL, self.BR = '\u2514', '\u2518'
-        self.WIDTH, self.HEIGHT = os.get_terminal_size()
+        self.WIDTH, self.HEIGHT = getSize()
         self.WIDTH -= 1     # for those fckng terminal errors etc.
 
     def parallel(self, events: list,
@@ -359,6 +359,19 @@ class Display:
     def color(self, track: str) -> Color:
         index = self.schedule.tracks_list.index(track)
         return Color.get((index % (len(Color) - 1)) + 1)
+
+
+def getSize() -> tuple:
+    """Get the terminal/output size"""
+    try:
+        return os.get_terminal_size()
+    except OSError:
+        try:
+            with os.popen('stty size') as f:
+                return map(int, reversed(f.read().split()))
+        except Exception as e:
+            return map(int, (os.environ.get('ROWS', 45),
+                             os.environ.get('COLUMNS', 80)))
 
 
 def retrieve(offline=False) -> GenericObject:
