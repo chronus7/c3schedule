@@ -479,6 +479,9 @@ def main():
                     'other filters still apply).')
     ma.add_argument('-O', '--one', '--event', type=int, metavar='ID',
                     help='Show only the given event (ignores other filter).')
+    ma.add_argument('-T', '--till', '--to', nargs='+', type=int,
+                    help='The time to filter to. Default is open end. '
+                    '[[[[[year] month] day] hour] minute]')
 
     # == parse args ======
     args = ap.parse_args()
@@ -497,13 +500,15 @@ def main():
         Color.nocolor()
 
     # set time
-    time = datetime.datetime.now()
-    dt_args = ['year', 'month', 'day', 'hour', 'minute']
-    dt_vals = {k: getattr(time, k, 0) for k in dt_args}
-    if args.date:
-        n = dict(zip(reversed(dt_args), reversed(args.date)))
-        dt_vals.update(n)
-    time = datetime.datetime(*(dt_vals[i] for i in dt_args))
+    def _parseDatetime(vals: list) -> datetime.datetime:
+        time = datetime.datetime.now()
+        dt_args = ['year', 'month', 'day', 'hour', 'minute']
+        dt_vals = {k: getattr(time, k, 0) for k in dt_args}
+        if vals:
+            n = dict(zip(reversed(dt_args), reversed(vals)))
+            dt_vals.update(n)
+        return datetime.datetime(*(dt_vals[i] for i in dt_args))
+    time = _parseDatetime(args.date)
 
     # set interval
     interval = datetime.timedelta(minutes=15)
@@ -535,6 +540,12 @@ def main():
         events = schedule.days[time.date()]
     elif args.all:
         events = schedule.events
+    elif args.till:
+        endtime = _parseDatetime(args.till)
+        events = [ev for ev in schedule.events
+                  if (args.rooms is None or ev.room in args.rooms)
+                  and (args.tracks is None or ev.track in args.tracks)
+                  and ev.date < endtime and ev.end > time]
     else:
         events = schedule.at(time, args.rooms, args.tracks)
     if args.selected:
