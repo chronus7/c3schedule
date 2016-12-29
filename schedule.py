@@ -243,6 +243,8 @@ class Display:
                 # persons
                 possible_lines += textwrap.wrap(', '.join(event.persons), rw)
                 # end
+                if len(possible_lines) - 1 < event.duration // step_size:
+                    possible_lines.insert(0, self.HL * rw)
                 while len(possible_lines) < event.duration // step_size:
                     possible_lines.append('')
                 possible_lines.append(self.HL * rw)
