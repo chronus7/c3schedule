@@ -43,10 +43,11 @@ Usage
 -----
 
 ```
-usage: schedule.py [-h] [-a] [-n] [-o] [-v] [-i MIN] [-e {full,short}]
+usage: schedule.py [-h] [-a] [-n] [-o] [-v] [-i MIN] [-e {short,full}]
                    [-s ID [ID ...]] [--selectfile SELECTFILE] [-S]
                    [-r ROOM [ROOM ...]] [-t TRACK [TRACK ...]]
-                   [-d DATE [DATE ...]] [-N | -D | -A | -O ID]
+                   [-d DATE [DATE ...]]
+                   [-N | -D | -A | -O ID | -T TILL [TILL ...]]
 
 Interface to the 33C3 Fahrplan (schedule).
 
@@ -59,10 +60,12 @@ optional arguments:
   -i MIN, --interval MIN
                         Interval steps between the lines. Default is 15
                         minutes.
-  -e {full,short}, --events {full,short}
+  -e {short,full}, --events {short,full}
                         Print events individually instead a timetable.
   -s ID [ID ...], --select ID [ID ...]
-                        Store the given ids as selected ones.
+                        Store the given ids as selected ones. This operation
+                        is additive and does not remove any previously stored
+                        values.
   --selectfile SELECTFILE
                         The file to store the selected events in.
   -S, --selected        Show only selected events.
@@ -79,6 +82,9 @@ optional arguments:
                         still apply).
   -O ID, --one ID, --event ID
                         Show only the given event (ignores other filter).
+  -T TILL [TILL ...], --till TILL [TILL ...], --to TILL [TILL ...]
+                        The time to filter to. Default is open end. [[[[[year]
+                        month] day] hour] minute]
 ```
 
 Timetable
