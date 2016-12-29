@@ -378,7 +378,7 @@ class Config:
 
     @selected.setter
     def selected(self, items: set):
-        self._storeSelected(items)
+        self._storeSelected(items - self._values)
         self._values |= items
 
     def _parseSelected(self):
