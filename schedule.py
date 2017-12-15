@@ -22,7 +22,7 @@ DATEFMT = '%Y-%m-%d'
 DATETIMEFMT = '%Y-%m-%dT%H:%M:%S+01:00'     # %z does not provide the colon
 TIMEFMT = '%H:%M'
 
-REMOTE = 'https://fahrplan.events.ccc.de/congress/2016/Fahrplan/schedule.json'
+REMOTE = 'https://fahrplan.events.ccc.de/congress/2017/Fahrplan/schedule.json'
 LOCAL = 'schedule.json'
 SELECTED = 'selected.conf'
 
@@ -100,8 +100,8 @@ class Schedule:
     @property
     def rooms_list(self):
         # ordered, as in webinterface
-        return ['Saal 1', 'Saal 2', 'Saal G', 'Saal 6']
-        # return sorted(self.rooms.keys())
+        # return ['Saal 1', 'Saal 2', 'Saal G', 'Saal 6']     # 33C3
+        return sorted(self.rooms.keys())
 
     @property
     def days_list(self):
@@ -462,7 +462,7 @@ def main():
 
     # filter
     ap.add_argument('-r', '--rooms', nargs='+', metavar='ROOM',
-                    choices={'Saal 1', 'Saal 2', 'Saal G', 'Saal 6'},
+                    # choices={'Saal 1', 'Saal 2', 'Saal G', 'Saal 6'},
                     help='Rooms to filter for.')
     ap.add_argument('-t', '--tracks', nargs='+', metavar='TRACK',
                     help='Tracks (categories) to filter for.')
