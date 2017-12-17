@@ -93,7 +93,7 @@ class Schedule:
                     self.rooms[room].append(evobj)
                     self.tracks[evobj.track].append(evobj)
                     for p in evobj.persons:
-                        self.speakers[p] = evobj
+                        self.speakers[p].append(evobj)
         # sorting
         self.events.sort(key=lambda x: x.date)
 
@@ -484,6 +484,8 @@ def main():
     ma.add_argument('-T', '--till', '--to', nargs='+', type=int,
                     help='The time to filter to. Default is open end. '
                     '[[[[[year] month] day] hour] minute]')
+    ma.add_argument('--speakers', nargs='+', metavar='SPEAKER',
+                    help="All events of these speakers")
 
     # == parse args ======
     args = ap.parse_args()
@@ -548,6 +550,9 @@ def main():
                   if (args.rooms is None or ev.room in args.rooms)
                   and (args.tracks is None or ev.track in args.tracks)
                   and ev.date < endtime and ev.end > time]
+    elif args.speakers:
+        events = [ev for ev in schedule.speakers.get(args.speakers[0], [])
+                  if all(s in ev.persons for s in args.speakers)]
     else:
         events = schedule.at(time, args.rooms, args.tracks)
     if args.selected:
