@@ -349,13 +349,13 @@ class Display:
             for line in description.split('\n'):
                 lines += textwrap.wrap(line, width)
 
-        l = [self.TL + self.HL * width + self.TR]
+        tmplines = [self.TL + self.HL * width + self.TR]
         for line in lines:
             tmp = re.sub('\033[[0-9;]*m', '', line)
             w = width + len(line) - len(tmp)
-            l.append('{}{:{}}{}'.format(self.VL, line, w, self.VL))
-        l.append(self.BL + self.HL * width + self.BR)
-        lines = l
+            tmplines.append('{}{:{}}{}'.format(self.VL, line, w, self.VL))
+        tmplines.append(self.BL + self.HL * width + self.BR)
+        lines = tmplines
 
         return '{}\n'.format(Color.Neutral).join(lines)
 
@@ -555,8 +555,15 @@ def main():
                   if all(s in ev.persons for s in args.speakers)]
     else:
         events = schedule.at(time, args.rooms, args.tracks)
+
+    # filter
     if args.selected:
         events = [ev for ev in events if ev.id in selected]
+    if not args.next and not args.till:
+        if args.tracks:
+            events = [ev for ev in events if ev.track in args.tracks]
+        if args.rooms:
+            events = [ev for ev in events if ev.room in args.rooms]
 
     # exit, if none found
     if not events:
