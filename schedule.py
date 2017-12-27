@@ -115,23 +115,23 @@ class Schedule:
     def tracks_list(self):
         return sorted(self.tracks.keys())
 
-    def at(self, time: datetime.datetime, room=None, track=None) -> list:
+    def at(self, time: datetime.datetime, rooms=None, tracks=None) -> list:
         """Return a list of events at the given timepoint"""
         res = [ev for ev in self.days[time.date()]
                if ev.date <= time <= ev.end]
-        if room is not None:
-            res = [ev for ev in res if ev.room == room]
-        if track is not None:
-            res = [ev for ev in res if ev.track == track]
+        if rooms is not None:
+            res = [ev for ev in res if ev.room in rooms]
+        if tracks is not None:
+            res = [ev for ev in res if ev.track in tracks]
         return res
 
-    def next(self, time: datetime.datetime, room=None, track=None) -> list:
+    def next(self, time: datetime.datetime, rooms=None, tracks=None) -> list:
         """Return a list of upcoming events"""
         at = self.at(time)
         if not at:
             return []
         end = min(e.end for e in at)
-        return self.at(end + datetime.timedelta(minutes=15), room, track)
+        return self.at(end + datetime.timedelta(minutes=15), rooms, tracks)
 
     def __repr__(self):
         # replace with daysLeft
