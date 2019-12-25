@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """schedule.py
 
-Interface to the 33C3 lecture schedule
+Interface to the 36C3 lecture schedule
 
 - Dave J (https://github.com/chronus7)
 """
@@ -11,6 +11,7 @@ from collections import defaultdict
 import datetime
 import enum
 import json
+import shutil
 import os
 import pathlib
 import re
@@ -22,7 +23,7 @@ DATEFMT = '%Y-%m-%d'
 DATETIMEFMT = '%Y-%m-%dT%H:%M:%S+01:00'     # %z does not provide the colon
 TIMEFMT = '%H:%M'
 
-REMOTE = 'https://fahrplan.events.ccc.de/congress/2017/Fahrplan/schedule.json'
+REMOTE = 'https://fahrplan.events.ccc.de/congress/2019/Fahrplan/schedule.json'
 LOCAL = 'schedule.json'
 SELECTED = 'selected.conf'
 
@@ -185,8 +186,10 @@ class Display:
     PREFIX_FORMAT = '{:>5s}{}'
     HTML_REGEX = re.compile('<.+?>')    # TODO really not good ;)
 
-    def __init__(self, schedule: Schedule, steps: datetime.timedelta=None,
-                 ascii: bool=False):
+    def __init__(self, schedule: Schedule,
+                 steps: datetime.timedelta = None,
+                 ascii: bool = False,
+                 width: int = None):
         self.schedule = schedule
         if steps is None or steps <= datetime.timedelta(0):
             steps = datetime.timedelta(minutes=15)
@@ -196,10 +199,14 @@ class Display:
             self.TL, self.TR = '\u250C', '\u2510'
             self.BL, self.BR = '\u2514', '\u2518'
         self.WIDTH, self.HEIGHT = getSize()
+        if width:
+            self.WIDTH = width
+        # if height:    # is not used anyway
+        #     self.HEIGHT = height
         self.WIDTH -= 1     # for those fckng terminal errors etc.
 
     def parallel(self, events: list,
-                 rooms: list=None, selected: set=set()) -> str:
+                 rooms: list = None, selected: set = set()) -> str:
         start_time = min(ev.date for ev in events)
         end_time = max(ev.end for ev in events)
 
@@ -403,12 +410,12 @@ class Config:
 def getSize() -> tuple:
     """Get the terminal/output size"""
     try:
-        return os.get_terminal_size()
+        return shutil.get_terminal_size()
     except OSError:
         try:
             with os.popen('stty size') as f:
                 return map(int, reversed(f.read().split()))
-        except Exception as e:
+        except Exception:
             return map(int, (os.environ.get('ROWS', 45),
                              os.environ.get('COLUMNS', 80)))
 
@@ -435,13 +442,17 @@ def retrieve(offline=False) -> GenericObject:
 
 def main():
     ap = argparse.ArgumentParser(
-        description='Interface to the 33C3 Fahrplan (schedule).')
+        description='Interface to the 36C3 Fahrplan (schedule).')
+
+    ap.add_argument('-o', '--offline', action='store_true',
+                    help='Do not try to pull the schedule from the internet.')
+    # visual
     ap.add_argument('-a', '--ascii', action='store_true',
                     help='Print ascii symbols instead of UTF-8 ones.')
     ap.add_argument('-n', '--nocolor', action='store_true',
                     help='Print no colors. Boring.')
-    ap.add_argument('-o', '--offline', action='store_true',
-                    help='Do not try to pull the schedule from the internet.')
+    ap.add_argument('-w', '--width', type=int, default=None,
+                    help='Number of columns to render in')
     ap.add_argument('-v', '--verbose', action='store_true',
                     help='Print additional info about the schedule.')
     ap.add_argument('-i', '--interval', type=int, metavar='MIN',
@@ -570,7 +581,7 @@ def main():
         exit()
 
     # display
-    display = Display(schedule, interval, args.ascii)
+    display = Display(schedule, interval, args.ascii, args.width)
     if args.events:
         for event in events:
             print(display.event(event, args.events == 'short', selected))

@@ -1,7 +1,7 @@
 c3schedule
 ==========
 
-`c3schedule` is a console interface to the 33C3 schedule. It shows you events,
+`c3schedule` is a console interface to the 36C3 schedule. It shows you events,
 based on the given filters.
 
 - **Views**: The tool supports two different methods to display events.
@@ -49,7 +49,7 @@ usage: schedule.py [-h] [-a] [-n] [-o] [-v] [-i MIN] [-e {short,full}]
                    [-d DATE [DATE ...]]
                    [-N | -D | -A | -O ID | -T TILL [TILL ...]]
 
-Interface to the 33C3 Fahrplan (schedule).
+Interface to the 36C3 Fahrplan (schedule).
 
 optional arguments:
   -h, --help            show this help message and exit
