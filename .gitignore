@@ -1,6 +1,6 @@
 *.json
 *.conf
 
-.ropeproject/
 *.swp
 *.swo
+__pycache__

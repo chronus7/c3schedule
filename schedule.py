@@ -71,12 +71,10 @@ class Schedule:
         self.end = datetime.datetime.strptime(conf.end, DATEFMT).date()
 
         for dayobj in conf.days:
-            dayobj = GenericObject(dayobj)
             day_date = datetime.datetime.strptime(dayobj.date, DATEFMT).date()
 
             for room, evlist in dayobj.rooms.items():
                 for evobj in evlist:
-                    evobj = GenericObject(evobj)
                     evobj.date = datetime.datetime.strptime(evobj.date,
                                                             DATETIMEFMT)
                     evobj.start = datetime.datetime.strptime(evobj.start,
@@ -428,7 +426,8 @@ def retrieve(offline=False) -> GenericObject:
             with urlopen(REMOTE) as response:
                 code = response.getcode()
                 if code == 200:
-                    data = json.loads(response.read().decode())
+                    data = json.loads(response.read().decode(),
+                                      object_hook=GenericObject)
         except URLError as err:
             pass
     if data:
@@ -436,8 +435,8 @@ def retrieve(offline=False) -> GenericObject:
             json.dump(data, f)
     else:
         with open(LOCAL, 'r') as f:
-            data = json.load(f)
-    return GenericObject(data)
+            data = json.load(f, object_hook=GenericObject)
+    return data
 
 
 def main():
