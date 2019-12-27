@@ -98,8 +98,9 @@ class Schedule:
 
     @property
     def rooms_list(self):
-        # ordered, as in webinterface
-        # return ['Saal 1', 'Saal 2', 'Saal G', 'Saal 6']     # 33C3
+        # ordered, as given (assuming order preservation)
+        # return list(self.rooms.keys())
+        # ordered (may be incorrect)
         return sorted(self.rooms.keys())
 
     @property
@@ -439,6 +440,23 @@ def retrieve(offline=False) -> GenericObject:
     return data
 
 
+def getDownloadURL(slug: str, folder: str = 'h264-hd') -> str:
+    """Retrieve the given video URL"""
+    data = None
+    info_url = "https://media.ccc.de/public/events/{}".format(slug)
+    try:
+        with urlopen(info_url) as response:
+            if response.getcode() == 200:
+                data = json.loads(response.read().decode(),
+                                  object_hook=GenericObject)
+    except URLError as err:
+        pass
+
+    if data:
+        for record in data.recordings:
+            if record.folder == folder:
+                return record.recording_url
+
 def main():
     ap = argparse.ArgumentParser(
         description='Interface to the 36C3 Fahrplan (schedule).')
@@ -457,8 +475,12 @@ def main():
     ap.add_argument('-i', '--interval', type=int, metavar='MIN',
                     help='Interval steps between the lines. '
                     'Default is 15 minutes.')
-    ap.add_argument('-e', '--events', choices={'short', 'full'},
+    va = ap.add_mutually_exclusive_group()
+    va.add_argument('-e', '--events', choices={'short', 'full'},
                     help='Print events individually instead a timetable.')
+    # TODO expand on this
+    va.add_argument('-u', '--url', action='store_true',
+                    help='List video download urls instead of info')
 
     # selected
     ap.add_argument('-s', '--select', nargs='+', metavar='ID', type=int,
@@ -580,6 +602,14 @@ def main():
         exit()
 
     # display
+    if args.url:
+        for event in sorted(events, key=lambda x: (x.date, x.room)):
+            # print(event.id, event.date, event.title)
+            url = getDownloadURL(event.slug)
+            # print('', url)
+            if url:
+                print(url)
+        return  # we do not want to display anything else
     display = Display(schedule, interval, args.ascii, args.width)
     if args.events:
         for event in events:

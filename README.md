@@ -43,25 +43,29 @@ Usage
 -----
 
 ```
-usage: schedule.py [-h] [-a] [-n] [-o] [-v] [-i MIN] [-e {short,full}]
-                   [-s ID [ID ...]] [--selectfile SELECTFILE] [-S]
-                   [-r ROOM [ROOM ...]] [-t TRACK [TRACK ...]]
-                   [-d DATE [DATE ...]]
-                   [-N | -D | -A | -O ID | -T TILL [TILL ...]]
+usage: schedule.py [-h] [-o] [-a] [-n] [-w WIDTH] [-v] [-i MIN]
+                   [-e {short,full} | -u] [-s ID [ID ...]]
+                   [--selectfile SELECTFILE] [-S] [-r ROOM [ROOM ...]]
+                   [-t TRACK [TRACK ...]] [-d DATE [DATE ...]]
+                   [-N | -D | -A | -O ID | -T TILL [TILL ...] | --speakers
+                   SPEAKER [SPEAKER ...]]
 
 Interface to the 36C3 Fahrplan (schedule).
 
 optional arguments:
   -h, --help            show this help message and exit
+  -o, --offline         Do not try to pull the schedule from the internet.
   -a, --ascii           Print ascii symbols instead of UTF-8 ones.
   -n, --nocolor         Print no colors. Boring.
-  -o, --offline         Do not try to pull the schedule from the internet.
+  -w WIDTH, --width WIDTH
+                        Number of columns to render in
   -v, --verbose         Print additional info about the schedule.
   -i MIN, --interval MIN
                         Interval steps between the lines. Default is 15
                         minutes.
   -e {short,full}, --events {short,full}
                         Print events individually instead a timetable.
+  -u, --url             List video download urls instead of info
   -s ID [ID ...], --select ID [ID ...]
                         Store the given ids as selected ones. This operation
                         is additive and does not remove any previously stored
@@ -85,6 +89,8 @@ optional arguments:
   -T TILL [TILL ...], --till TILL [TILL ...], --to TILL [TILL ...]
                         The time to filter to. Default is open end. [[[[[year]
                         month] day] hour] minute]
+  --speakers SPEAKER [SPEAKER ...]
+                        All events of these speakers
 ```
 
 Timetable
