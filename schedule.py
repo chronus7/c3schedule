@@ -21,9 +21,10 @@ from urllib.error import URLError
 
 DATEFMT = '%Y-%m-%d'
 DATETIMEFMT = '%Y-%m-%dT%H:%M:%S+01:00'     # %z does not provide the colon
+DATETIMEFMT0 = '%Y-%m-%dT%H:%M:%S+00:00'     # %z does not provide the colon
 TIMEFMT = '%H:%M'
 
-REMOTE = 'https://fahrplan.events.ccc.de/congress/2019/Fahrplan/schedule.json'
+REMOTE = 'https://fahrplan.events.ccc.de/congress/2023/fahrplan/schedule.json'
 LOCAL = 'schedule.json'
 SELECTED = 'selected.conf'
 
@@ -66,9 +67,10 @@ class Schedule:
         self.title = conf.title
         self.short = conf.acronym
         # 2016-12-27
-        self.start = datetime.datetime.strptime(conf.start, DATEFMT).date()
+        self.start = datetime.datetime.strptime(conf.start,
+                                                DATETIMEFMT0).date()
         # 2016-12-30
-        self.end = datetime.datetime.strptime(conf.end, DATEFMT).date()
+        self.end = datetime.datetime.strptime(conf.end, DATETIMEFMT0).date()
 
         for dayobj in conf.days:
             day_date = datetime.datetime.strptime(dayobj.date, DATEFMT).date()
@@ -90,6 +92,7 @@ class Schedule:
                     self.ids[evobj.id] = evobj
                     self.days[day_date].append(evobj)
                     self.rooms[room].append(evobj)
+                    evobj.track = str(evobj.track)  # fixes None errors
                     self.tracks[evobj.track].append(evobj)
                     for p in evobj.persons:
                         self.speakers[p].append(evobj)
@@ -236,8 +239,8 @@ class Display:
                 # wrap title
                 possible_lines = ['{}{:{}}{}'.format(Color.Selected if
                                                      event.id in selected else
-                                                     Color.Title, l, rw,
-                                                     Color.Neutral) for l in
+                                                     Color.Title, line, rw,
+                                                     Color.Neutral) for line in
                                   textwrap.wrap('{} ({})'.format(event.title,
                                                                  event.id),
                                                 rw)]
@@ -312,7 +315,7 @@ class Display:
         return '{}\n'.format(Color.Neutral).join(lines)
 
     def event(self, event: GenericObject,
-              short: bool=False, selected: set=set()) -> str:
+              short: bool = False, selected: set = set()) -> str:
         # {T}title{n} (id)
         # --- subtitle
         # {t}track{n} // room // language
@@ -395,7 +398,7 @@ class Config:
             data = f.readlines()
         for line in data:
             line = line.strip()
-            m = re.match('^\d+', line)
+            m = re.match(r'^\d+', line)
             if m:
                 value = line[slice(*m.span())]
                 self._values.add(int(value))
@@ -429,7 +432,7 @@ def retrieve(offline=False) -> GenericObject:
                 if code == 200:
                     data = json.loads(response.read().decode(),
                                       object_hook=GenericObject)
-        except URLError as err:
+        except URLError:
             pass
     if data:
         with open(LOCAL, 'w') as f:
@@ -543,7 +546,7 @@ def main():
         if vals:
             n = dict(zip(reversed(dt_args), reversed(vals)))
             dt_vals.update(n)
-        return datetime.datetime(*(dt_vals[i] for i in dt_args))
+        return datetime.datetime(**dt_vals)
     time = _parseDatetime(args.date)
 
     # set interval
