@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """schedule.py
 
-Interface to the 36C3 lecture schedule
+Interface to the 38C3 lecture schedule
 
-- Dave J (https://github.com/chronus7)
+- chronus (https://github.com/chronus7)
 """
 import argparse
 from collections import defaultdict
@@ -18,13 +18,14 @@ import re
 import textwrap
 from urllib.request import urlopen
 from urllib.error import URLError
+from typing import Any
 
 DATEFMT = '%Y-%m-%d'
-DATETIMEFMT = '%Y-%m-%dT%H:%M:%S+01:00'     # %z does not provide the colon
-DATETIMEFMT0 = '%Y-%m-%dT%H:%M:%S+00:00'     # %z does not provide the colon
 TIMEFMT = '%H:%M'
 
-REMOTE = 'https://fahrplan.events.ccc.de/congress/2023/fahrplan/schedule.json'
+# the new pretalx tool provides differently formatted content!
+REMOTE = '''https://fahrplan.events.ccc.de/congress/2024/fahrplan/schedule/\
+v/1.0/widgets/schedule.json'''
 LOCAL = 'schedule.json'
 SELECTED = 'selected.conf'
 
@@ -44,58 +45,77 @@ class GenericObject(dict):
     def __getattr__(self, item):
         if item in self:
             return self[item]
-        return AttributeError
+        raise AttributeError(item)
 
 
 class Schedule:
-    events = []
-    ids = {}
-    days = defaultdict(list)
-    rooms = defaultdict(list)
-    tracks = defaultdict(list)
-    speakers = defaultdict(list)
+    events: list[GenericObject] = []
+    ids: dict[Any, GenericObject] = {}
+    days: dict[datetime, list[GenericObject]] = defaultdict(list)
+    rooms: dict[datetime, list[GenericObject]] = defaultdict(list)
+    tracks: dict[datetime, list[GenericObject]] = defaultdict(list)
+    speakers: dict[datetime, list[GenericObject]] = defaultdict(list)
 
     def __init__(self, data: GenericObject):
-        self._data = data.schedule
+        # self._data = data.schedule
+        self._data = data
 
         self._prepare()
 
     def _prepare(self):
         """Prepare data for easy and correct usage"""
-        self.version = self._data.version
-        conf = self._data.conference
-        self.title = conf.title
-        self.short = conf.acronym
-        # 2016-12-27
-        self.start = datetime.datetime.strptime(conf.start,
-                                                DATETIMEFMT0).date()
-        # 2016-12-30
-        self.end = datetime.datetime.strptime(conf.end, DATETIMEFMT0).date()
+        data = self._data
+        self.version = data.version
 
-        for dayobj in conf.days:
-            day_date = datetime.datetime.strptime(dayobj.date, DATEFMT).date()
+        def int_finder(x: str) -> int:
+            try:
+                return int(x)
+            except ValueError:
+                return 0
 
-            for room, evlist in dayobj.rooms.items():
-                for evobj in evlist:
-                    evobj.date = datetime.datetime.strptime(evobj.date,
-                                                            DATETIMEFMT)
-                    evobj.start = datetime.datetime.strptime(evobj.start,
-                                                             TIMEFMT).time()
-                    dur = datetime.datetime.strptime(evobj.duration,
-                                                     TIMEFMT).time()
-                    evobj.duration = datetime.timedelta(hours=dur.hour,
-                                                        minutes=dur.minute)
-                    evobj.end = evobj.date + evobj.duration
-                    evobj.persons = [i['public_name'] for i in evobj.persons]
-                    # adding
-                    self.events.append(evobj)
-                    self.ids[evobj.id] = evobj
-                    self.days[day_date].append(evobj)
-                    self.rooms[room].append(evobj)
-                    evobj.track = str(evobj.track)  # fixes None errors
-                    self.tracks[evobj.track].append(evobj)
-                    for p in evobj.persons:
-                        self.speakers[p].append(evobj)
+        acronym_cnt = next(
+            filter(lambda x: x != 0, map(int_finder, REMOTE.split('/')))
+        ) - 2024 + 38
+        # there doesn't seem to be a proper title anymore
+        self.title = f"{acronym_cnt}th Chaos Communication Congress"
+        self.short = f"{acronym_cnt}c3"
+
+        # 2024-12-27
+        self.start = datetime.date.fromisoformat(data.event_start)
+        # 2024-12-30
+        self.end = datetime.date.fromisoformat(data.event_end)
+
+        _tracks = {
+            t.id: t.name.get("en", t.name.get("de")) for t in data.tracks
+        }
+        _rooms = {r.id: r.name.get("en", r.name.get("de")) for r in data.rooms}
+        _speakers = {s.code: s.name for s in data.speakers}
+
+        for evobj in data.talks:
+            if "track" not in evobj:
+                continue
+
+            evobj.track = _tracks.get(evobj.track, evobj.track)
+            evobj.room = _rooms.get(evobj.room, evobj.room)
+            evobj.speakers = [_speakers.get(s, s) for s in evobj.speakers]
+
+            evobj.start = datetime.datetime.fromisoformat(evobj.start)
+            evobj.end = datetime.datetime.fromisoformat(evobj.end)
+            evobj.date = evobj.start.date()
+            if evobj.start.hour < 9:
+                # arbitrary hour to keep after midnight events in previous day
+                evobj.date -= datetime.timedelta(days=1)
+
+            evobj.duration = datetime.timedelta(minutes=evobj.duration)
+
+            self.events.append(evobj)
+            self.ids[evobj.code] = evobj
+            self.days[evobj.date].append(evobj)
+            self.rooms[evobj.room].append(evobj)
+            self.tracks[evobj.track].append(evobj)
+            for speaker in evobj.speakers:
+                self.speakers[speaker].append(evobj)
+
         # sorting
         self.events.sort(key=lambda x: x.date)
 
@@ -121,7 +141,7 @@ class Schedule:
     def at(self, time: datetime.datetime, rooms=None, tracks=None) -> list:
         """Return a list of events at the given timepoint"""
         res = [ev for ev in self.days[time.date()]
-               if ev.date <= time <= ev.end]
+               if ev.start <= time <= ev.end]
         if rooms is not None:
             res = [ev for ev in res if ev.room in rooms]
         if tracks is not None:
@@ -209,7 +229,7 @@ class Display:
 
     def parallel(self, events: list,
                  rooms: list = None, selected: set = set()) -> str:
-        start_time = min(ev.date for ev in events)
+        start_time = min(ev.start for ev in events)
         end_time = max(ev.end for ev in events)
 
         step_size = self.step_size          # easier access
@@ -234,7 +254,7 @@ class Display:
         # build events for rooms
         for i, room in enumerate(rooms):
             room_events = sorted((ev for ev in events if ev.room == room),
-                                 key=lambda x: x.date)
+                                 key=lambda x: x.start)
             for j, event in enumerate(room_events):
                 # wrap title
                 possible_lines = ['{}{:{}}{}'.format(Color.Selected if
@@ -250,7 +270,7 @@ class Display:
                     textwrap.shorten(event.track, width=rw, placeholder=' ..'),
                     rw, Color.Neutral))
                 # persons
-                possible_lines += textwrap.wrap(', '.join(event.persons), rw)
+                possible_lines += textwrap.wrap(', '.join(event.speakers), rw)
                 # end
                 if len(possible_lines) - 1 < event.duration // step_size:
                     possible_lines.insert(0, self.HL * rw)
@@ -258,12 +278,12 @@ class Display:
                     possible_lines.append('')
                 possible_lines.append(self.HL * rw)
 
-                current = event.date
+                current = event.start
                 # adjust end to allow for more info
                 end = event.end
                 if j < len(room_events) - 1:
                     upcoming = room_events[j + 1]
-                    if event.end == upcoming.date:
+                    if event.end == upcoming.start:
                         end = event.end - step_size
 
                 # select writable lines
@@ -317,8 +337,7 @@ class Display:
     def event(self, event: GenericObject,
               short: bool = False, selected: set = set()) -> str:
         # {T}title{n} (id)
-        # --- subtitle
-        # {t}track{n} // room // language
+        # {t}track{n} // room
         # day [<start> -<dur>- <end>]
         # persons
         # abstract
@@ -331,20 +350,19 @@ class Display:
                                  event.title,
                                  Color.Neutral,
                                  event.id),
-            '--- {}'.format(event.subtitle),
-            '{}{}{} // {} // {}'.format(self.color(event.track),
-                                        event.track,
-                                        Color.Neutral,
-                                        event.room,
-                                        event.language),
-            '{} {} [{} <{}> {}]'.format(event.date.strftime('%a'),
-                                        event.date.strftime(DATEFMT),
-                                        event.date.strftime(TIMEFMT),
-                                        datetime.datetime.utcfromtimestamp(
+            '{}{}{} // {}'.format(self.color(event.track),
+                                  event.track,
+                                  Color.Neutral,
+                                  event.room),
+            '{} {} [{} <{}> {}]'.format(event.start.strftime('%a'),
+                                        event.start.strftime(DATEFMT),
+                                        event.start.strftime(TIMEFMT),
+                                        datetime.datetime.fromtimestamp(
                                             event.duration.seconds)
+                                        .astimezone(datetime.UTC)
                                         .strftime(TIMEFMT),
                                         event.end.strftime(TIMEFMT)),
-            ', '.join(event.persons)
+            ', '.join(event.speakers)
         ]
         if not short:
             lines.append('')
@@ -353,14 +371,15 @@ class Display:
             for line in abstract.split('\n'):
                 lines += textwrap.wrap(line, width)
             lines.append('')
-            description = '{}DESCRIPTION{} '.format(Color.Grey, Color.Neutral)
-            description += self.HTML_REGEX.sub('', event.description)
-            for line in description.split('\n'):
-                lines += textwrap.wrap(line, width)
+            # description = '{}DESCRIPTION{} '.format(Color.Grey,
+            #                                         Color.Neutral)
+            # description += self.HTML_REGEX.sub('', event.description)
+            # for line in description.split('\n'):
+            #     lines += textwrap.wrap(line, width)
 
         tmplines = [self.TL + self.HL * width + self.TR]
         for line in lines:
-            tmp = re.sub('\033[[0-9;]*m', '', line)
+            tmp = re.sub('\033\\[[0-9;]*m', '', line)
             w = width + len(line) - len(tmp)
             tmplines.append('{}{:{}}{}'.format(self.VL, line, w, self.VL))
         tmplines.append(self.BL + self.HL * width + self.BR)
@@ -452,13 +471,14 @@ def getDownloadURL(slug: str, folder: str = 'h264-hd') -> str:
             if response.getcode() == 200:
                 data = json.loads(response.read().decode(),
                                   object_hook=GenericObject)
-    except URLError as err:
+    except URLError:
         pass
 
     if data:
         for record in data.recordings:
             if record.folder == folder:
                 return record.recording_url
+
 
 def main():
     ap = argparse.ArgumentParser(
@@ -546,7 +566,7 @@ def main():
         if vals:
             n = dict(zip(reversed(dt_args), reversed(vals)))
             dt_vals.update(n)
-        return datetime.datetime(**dt_vals)
+        return datetime.datetime(**dt_vals).astimezone()
     time = _parseDatetime(args.date)
 
     # set interval
@@ -587,7 +607,7 @@ def main():
                   and ev.date < endtime and ev.end > time]
     elif args.speakers:
         events = [ev for ev in schedule.speakers.get(args.speakers[0], [])
-                  if all(s in ev.persons for s in args.speakers)]
+                  if all(s in ev.speakers for s in args.speakers)]
     else:
         events = schedule.at(time, args.rooms, args.tracks)
 
